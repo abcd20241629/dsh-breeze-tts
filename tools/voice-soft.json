@@ -1,0 +1,11 @@
+{
+  "wav": "D:\\dsh\\plugins\\dsh-breeze-tts\\data\\out\\breeze_design_20261105_182724_47323564.wav",
+  "reference_text": "主人——本鱼今天也有好好待在水里哦。",
+  "name": "软糖鲸",
+  "mode": "direction",
+  "instruction": "语速偏慢，尾音轻轻上扬，像在撒娇，句子之间留一点空白。",
+  "timbre": "一位十四五岁的少女声音，音色软糯，带明显气声和一点鼻音，音高偏高但不尖锐，说话像嘴里含着半颗糖，共鸣靠前、偏轻。",
+  "tags": ["大肥鱼", "软糖鲸", "日常声"],
+  "language": "zh",
+  "preview_text": "主人，本鱼在这里。"
+}

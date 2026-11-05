@@ -1,7 +1,7 @@
 {
   "name": "@dsh-external/dsh-breeze-tts",
-  "version": "0.1.0",
-  "description": "本机 Breeze TTS 2 配音级语音合成：直连 T8star 的 Python 后端 /ws/generate，wav 落盘并播放",
+  "version": "0.2.0",
+  "description": "本机 Breeze TTS 2 配音级语音合成：直连 T8star 的 Python 后端 /ws/generate，按卡片绑定参考音频锁音色，wav 落盘并播放",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -11,6 +11,9 @@
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./client/service": "./lib/client.js",
+    "./client/api": "./lib/client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
@@ -29,6 +32,12 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
-    }
+    },
+    "client": {
+      "inject": [],
+      "platform": "web",
+      "immediately": true
+    },
+    "manifestVersion": 1
   }
 }
