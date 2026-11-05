@@ -1,6 +1,6 @@
 {
   "name": "@dsh-external/dsh-breeze-tts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "本机 Breeze TTS 2 配音级语音合成：直连 T8star 的 Python 后端 /ws/generate，按卡片绑定参考音频锁音色，wav 落盘并播放",
   "license": "MIT",
   "type": "module",

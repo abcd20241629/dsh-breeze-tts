@@ -2,8 +2,12 @@
 
 给 DSH 一副嗓子。用本机 **Breeze TTS 2**（配音级中文语音合成）说话：生成 wav、落盘、播放。
 
-> 这不是实时对话引擎。模型常驻后，2~3 秒音频约需 30 秒；第一次冷启动还要加上模型上卡的时间。
-> 适合「我先在后台算好，算完念给你听」，不适合一问一答的连续对话。
+> 这不是实时对话引擎。模型常驻后，约 1 秒音频要 5~6 秒算（6.96 秒音频 → 40~45 秒）；
+> 第一次冷启动还要加上模型上卡的时间。适合「我先在后台算好，算完念给你听」，
+> 不适合一问一答的连续对话。
+>
+> 2026-11-06 之前这里写的是「2~3 秒音频约需 30 秒」，那时候其实一直没跑满 CPU：
+> 后端进程被 Windows 节流到能效核，同样的音频要 136~149 秒。见下面「第三个坑」。
 
 ## 它从哪来
 
@@ -56,7 +60,7 @@ dev_inject_plugin D:\dsh\plugins\dsh-breeze-tts
 | `BREEZE_TTS_PORT` | `7860` |
 | `BREEZE_TTS_DATA` | `D:\dsh\plugins\dsh-breeze-tts\data` |
 
-## 两个坑（写死了，别再踩）
+## 三个坑（写死了，别再踩）
 
 **1. numba 缓存目录必须可写。**
 DSH 沙箱默认写不了 `%LOCALAPPDATA%`，numba 于是每次冷编译 —— 光 `import qwen_tts` 就要 **7 分钟**。
@@ -66,6 +70,24 @@ DSH 沙箱默认写不了 `%LOCALAPPDATA%`，numba 于是每次冷编译 —— 
 **2. 后端有三个目录必须指进可写位置。**
 `T8_BREEZE_DATA_DIR`（日志 + 数据库）、`T8_BREEZE_OUTPUT_DIR`（wav）、`NUMBA_CACHE_DIR`。
 不设的话启动直接 `PermissionError: [WinError 5]`。
+
+**3. 必须把后端进程提到 High 优先级（这个坑最贵，慢 3.8 倍）。**
+Windows「平衡」电源计划的 EcoQoS 会把普通优先级的后台 python 进程调度到**能效核（E-core）**上，
+单核性能只剩 P-core 的 ~1/4，而这个模型每帧音频都要跑一串**串行的小 kernel**，
+GPU 全程在等 CPU 喂数据 —— 表现为「显卡没吃饱、功耗 26W、风扇不转」。
+
+同一后端、同一段文本、同一组参数（cfg 4.0 / seed 42 / max_new_tokens 1500 / fast_all false），
+6.96 秒音频的实测：
+
+| 进程优先级 | 耗时 | RTF | GPU 利用率 |
+| --- | --- | --- | --- |
+| Normal（默认） | 136~149 秒 | 19~21 | avg 29%（满频 2745 MHz，26W） |
+| **High** | **37~45 秒** | **5.3~6.5** | **生成段 90~99%** |
+
+生成窗口内 python 单核 ~85% —— 它不在算不动，是被按在慢核上算。
+插件在 `boot()` spawn 完立刻调 `raisePriority(pid)`（powershell 循环重试 10 秒，直到
+`PriorityClass='High'` 成功）。**不要用 `detached: true` 起那个 powershell**：实测 detached
+时静默不生效，进程优先级仍是 Normal。
 
 ## 已知限制
 
