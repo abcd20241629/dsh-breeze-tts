@@ -1,0 +1,7 @@
+# 生成的音频与运行期缓存不进版本库
+data/
+*.wav
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

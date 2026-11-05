@@ -1,0 +1,3 @@
+- insert:
+    - id: breeze-tts
+      name: "@dsh-external/dsh-breeze-tts"
